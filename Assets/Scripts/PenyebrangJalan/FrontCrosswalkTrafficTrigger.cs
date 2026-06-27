@@ -23,17 +23,17 @@ public class FrontCrosswalkTrafficTrigger : MonoBehaviour
 
     private void Update()
     {
-        if (crosswalkZone == null) return;
+        if (crosswalkZone == null)
+            return;
 
         towardPlayerNPCs.RemoveWhere(npc => npc == null);
 
-        // NPC toward-player di trigger depan selalu berhenti
         foreach (var npc in towardPlayerNPCs)
         {
-            if (npc != null)
-            {
-                npc.SetStoppedByCrosswalk(true, crosswalkZone);
-            }
+            if (npc == null)
+                continue;
+
+            npc.SetStoppedByCrosswalk(true, crosswalkZone);
         }
     }
 

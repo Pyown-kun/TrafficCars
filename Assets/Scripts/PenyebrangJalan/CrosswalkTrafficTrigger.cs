@@ -79,19 +79,19 @@ public class CrosswalkTrafficTrigger : MonoBehaviour
         if (ignorePlayer) return;
 
         // =========================================================
-        // PLAYER HANYA DI-LOCK JIKA:
-        // - sedang berada di trigger
-        // - DAN sedang brake
+        // Player hanya bisa berhenti jika:
+        // - berada di dalam trigger
+        // - sedang brake
+        // - kecepatan dunia sudah cukup rendah
         // =========================================================
-        if (playerInside && crosswalkZone.playerCar.IsBraking())
+        if (playerInside &&
+            crosswalkZone.playerCar.IsBraking() &&
+            crosswalkZone.CanFreezePlayer())
         {
-            crosswalkZone.playerCar.SetCrosswalkMovementLock(true);
             crosswalkZone.FreezeCrosswalkForCrossing();
         }
         else
         {
-            // Kalau player tidak brake dan crosswalk belum freeze,
-            // jangan lock player
             if (!crosswalkZone.IsFrozenForCrossing())
             {
                 crosswalkZone.playerCar.SetCrosswalkMovementLock(false);

@@ -10,7 +10,6 @@ public class PlayerCarController : MonoBehaviour
 
     [Header("Brake")]
     public bool isBraking;
-    public float brakeSlowMultiplier = 0.5f;
 
     private bool canMove = true;
     private float horizontalInput;
@@ -20,11 +19,17 @@ public class PlayerCarController : MonoBehaviour
 
     private void Update()
     {
-        if (!canMove) return;
-        if (Time.timeScale == 0f) return;
+        if (Time.timeScale == 0f)
+            return;
 
         HandleInput();
-        MoveHorizontal();
+
+        if (canMove)
+        {
+            MoveHorizontal();
+        }
+
+        UpdateWorldBrakeState();
     }
 
     void HandleInput()
@@ -53,7 +58,9 @@ public class PlayerCarController : MonoBehaviour
         if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
             horizontalInput = 1f;
 
-        isBraking = keyboard.spaceKey.isPressed || keyboard.sKey.isPressed;
+        isBraking =
+            keyboard.spaceKey.isPressed ||
+            keyboard.sKey.isPressed;
     }
 
     void MoveHorizontal()
@@ -61,11 +68,30 @@ public class PlayerCarController : MonoBehaviour
         if (movementLockedByCrosswalk)
             return;
 
-        transform.Translate(Vector3.right * horizontalInput * moveSpeed * Time.deltaTime, Space.World);
+        transform.Translate(
+            Vector3.right *
+            horizontalInput *
+            moveSpeed *
+            Time.deltaTime,
+            Space.World);
 
         Vector3 pos = transform.position;
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         transform.position = pos;
+    }
+
+    /// <summary>
+    /// Mengirim status brake player ke WorldSpeedManager.
+    /// Player tetap diam, yang melambat adalah dunia.
+    /// </summary>
+    void UpdateWorldBrakeState()
+    {
+        if (WorldSpeedManager.Instance == null)
+            return;
+
+        // Saat crosswalk mengunci player,
+        // dunia tetap dianggap sedang brake.
+        WorldSpeedManager.Instance.SetBraking(IsBraking());
     }
 
     public void StopPlayer()
@@ -88,9 +114,8 @@ public class PlayerCarController : MonoBehaviour
     }
 
     /// <summary>
-    /// Dipakai khusus animator / visual.
-    /// True hanya saat player benar-benar menekan brake manual,
-    /// bukan saat brake dipaksa oleh crosswalk lock.
+    /// Dipakai animator.
+    /// True hanya jika player benar-benar menekan brake.
     /// </summary>
     public bool IsManualBraking()
     {
@@ -113,10 +138,6 @@ public class PlayerCarController : MonoBehaviour
         return movementLockedByCrosswalk;
     }
 
-    /// <summary>
-    /// Untuk animator turn left / right.
-    /// Nilai umumnya -1, 0, 1.
-    /// </summary>
     public float GetHorizontalInput()
     {
         return horizontalInput;

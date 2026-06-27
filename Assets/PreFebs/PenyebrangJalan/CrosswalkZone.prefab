@@ -344,9 +344,10 @@ MonoBehaviour:
   rightEndPoint: {fileID: 3716091930297263838}
   rightStartPoint: {fileID: 8458249088482546271}
   leftEndPoint: {fileID: 4561098974609987238}
-  moveSpeed: 15
+  worldSpeedMultiplier: 1
   destroyBehindPlayerZ: -25
   activationDistanceFront: 6
   activationDistanceBack: 3
+  maxWorldSpeedToFreeze: 3
   playerCar: {fileID: 0}
   ambulanceBlocking: 0

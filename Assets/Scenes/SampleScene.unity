@@ -329,8 +329,6 @@ MonoBehaviour:
   ambulancePrefab: {fileID: 4067708525535015528, guid: adbc41f97b30fd147b56b49483c61bb0, type: 3}
   spawnPointBehind: {fileID: 604305613}
   playerCar: {fileID: 1411187841}
-  minSpawnTime: 10
-  maxSpawnTime: 10
   spawnCheckRadius: 10
   vehicleLayerMask:
     serializedVersion: 2
@@ -396,8 +394,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PedestrianSpawner
   crosswalkZonePrefab: {fileID: 9205756879010983212, guid: 9c49a13cb4970a24b869d0cc5144eae5, type: 3}
   pedestrianPrefab: {fileID: 8892812524622077749, guid: 4b3e7f8fc1edb314c86e5df908ee3b0c, type: 3}
-  minSpawnInterval: 1
-  maxSpawnInterval: 3
   spawnDistanceAhead: 50
   spawnX: 0
   spawnY: 2
@@ -698,6 +694,7 @@ GameObject:
   - component: {fileID: 1096405324}
   - component: {fileID: 1096405323}
   - component: {fileID: 1096405326}
+  - component: {fileID: 1096405327}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -783,6 +780,26 @@ MonoBehaviour:
   brakeWorldSpeed: 4
   brakeAcceleration: 8
   recoverAcceleration: 8
+--- !u!114 &1096405327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1096405322}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f44f33e740c757c4c9702c9007d8190a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WorldEventManager
+  pedestrianSpawner: {fileID: 631781948}
+  ambulanceSpawners:
+  - {fileID: 2034504513}
+  - {fileID: 604305612}
+  minEventInterval: 12
+  maxEventInterval: 18
+  ambulanceChance: 50
+  crosswalkChance: 50
 --- !u!1 &1267529379
 GameObject:
   m_ObjectHideFlags: 0
@@ -1401,8 +1418,6 @@ MonoBehaviour:
   ambulancePrefab: {fileID: 4067708525535015528, guid: adbc41f97b30fd147b56b49483c61bb0, type: 3}
   spawnPointBehind: {fileID: 2034504514}
   playerCar: {fileID: 1411187841}
-  minSpawnTime: 2
-  maxSpawnTime: 4
   spawnCheckRadius: 10
   vehicleLayerMask:
     serializedVersion: 2

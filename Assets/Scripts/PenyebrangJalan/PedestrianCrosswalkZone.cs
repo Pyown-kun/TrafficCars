@@ -33,6 +33,7 @@ public class PedestrianCrosswalkZone : MonoBehaviour
 
     private PedestrianController currentPedestrian;
     private bool isFrozenForCrossing = false;
+    private bool eventRegistered = false;
 
     // Semua NPC yang sedang berada pada area stop crosswalk
     private readonly HashSet<NPCCarController> stoppedNPCs =
@@ -103,12 +104,27 @@ public class PedestrianCrosswalkZone : MonoBehaviour
     public void RegisterPedestrian(PedestrianController pedestrian)
     {
         currentPedestrian = pedestrian;
+
+        if (!eventRegistered &&
+            WorldEventManager.Instance != null)
+        {
+            WorldEventManager.Instance.NotifyCrosswalkSpawned();
+            eventRegistered = true;
+        }
     }
 
     public void NotifyPedestrianFinished()
     {
         currentPedestrian = null;
+
         ResumeCrosswalkAfterCrossing();
+
+        if (eventRegistered &&
+            WorldEventManager.Instance != null)
+        {
+            WorldEventManager.Instance.FinishCurrentEvent();
+            eventRegistered = false;
+        }
     }
 
     public void SetAmbulanceBlocking(bool value)
@@ -272,6 +288,13 @@ public class PedestrianCrosswalkZone : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (eventRegistered &&
+            WorldEventManager.Instance != null)
+        {
+            WorldEventManager.Instance.FinishCurrentEvent();
+            eventRegistered = false;
+        }
+
         if (playerCar != null)
         {
             playerCar.SetCrosswalkMovementLock(false);
@@ -313,5 +336,10 @@ public class PedestrianCrosswalkZone : MonoBehaviour
             return false;
 
         return playerCar.IsMovementLockedByCrosswalk();
+    }
+
+    public bool IsEventRegistered()
+    {
+        return eventRegistered;
     }
 }

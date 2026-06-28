@@ -27,6 +27,7 @@ public class AmbulanceController : MonoBehaviour
     private float currentSpeed;
     private float cachedBrakeWorldSpeed;
     private bool previousBrake;
+    private bool eventFinished = false;
 
     float WorldSpeed
     {
@@ -102,7 +103,19 @@ public class AmbulanceController : MonoBehaviour
 
         if (transform.position.z > destroyFrontZ)
         {
+            eventFinished = true;
             Destroy(gameObject);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (!eventFinished)
+            return;
+
+        if (WorldEventManager.Instance == null)
+            return;
+
+        WorldEventManager.Instance.NotifyEventFinished();
     }
 }

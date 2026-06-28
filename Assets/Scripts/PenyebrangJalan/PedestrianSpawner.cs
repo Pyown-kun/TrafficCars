@@ -8,10 +8,6 @@ public class PedestrianSpawner : MonoBehaviour
     [Header("Pedestrian Prefab")]
     public GameObject pedestrianPrefab;
 
-    [Header("Spawn Timing")]
-    public float minSpawnInterval = 10f;
-    public float maxSpawnInterval = 18f;
-
     [Header("Spawn Position")]
     [Tooltip("Jarak spawn zone di depan player pada sumbu Z")]
     public float spawnDistanceAhead = 35f;
@@ -25,43 +21,38 @@ public class PedestrianSpawner : MonoBehaviour
     [Header("References")]
     public PlayerCarController playerCar;
 
-    private float timer;
-    private float nextSpawnTime;
     private PedestrianCrosswalkZone activeZone;
 
-    private void Start()
+    /// <summary>
+    /// Dipanggil oleh WorldEventManager.
+    /// Return TRUE jika crosswalk berhasil di-spawn.
+    /// </summary>
+    public bool RequestSpawn()
     {
-        SetNextSpawnTime();
-    }
+        if (crosswalkZonePrefab == null)
+            return false;
 
-    private void Update()
-    {
-        if (Time.timeScale == 0f) return;
-        if (crosswalkZonePrefab == null) return;
-        if (pedestrianPrefab == null) return;
-        if (playerCar == null) return;
+        if (pedestrianPrefab == null)
+            return false;
 
-        // Kalau zone sudah hilang, kosongkan ref
+        if (playerCar == null)
+            return false;
+
+        // Bersihkan reference jika zone sudah dihancurkan
         if (activeZone != null && activeZone.gameObject == null)
         {
             activeZone = null;
         }
 
-        timer += Time.deltaTime;
+        // Masih ada crosswalk aktif
+        if (activeZone != null)
+            return false;
 
-        if (timer >= nextSpawnTime)
-        {
-            TrySpawnCrosswalkZone();
-            timer = 0f;
-            SetNextSpawnTime();
-        }
+        return TrySpawnCrosswalkZone();
     }
 
-    void TrySpawnCrosswalkZone()
+    bool TrySpawnCrosswalkZone()
     {
-        // Sementara 1 crosswalk aktif saja
-        if (activeZone != null) return;
-
         Vector3 spawnPos = new Vector3(
             spawnX,
             spawnY,
@@ -74,57 +65,109 @@ public class PedestrianSpawner : MonoBehaviour
             Quaternion.identity
         );
 
-        PedestrianCrosswalkZone zone = zoneObj.GetComponent<PedestrianCrosswalkZone>();
+        PedestrianCrosswalkZone zone =
+            zoneObj.GetComponent<PedestrianCrosswalkZone>();
+
         if (zone == null)
         {
-            Debug.LogWarning("CrosswalkZone prefab tidak punya PedestrianCrosswalkZone component.");
+            Debug.LogWarning(
+                "CrosswalkZone prefab tidak memiliki PedestrianCrosswalkZone."
+            );
+
             Destroy(zoneObj);
-            return;
+            return false;
         }
 
         zone.playerCar = playerCar;
+
         activeZone = zone;
 
-        SpawnPedestrianForZone(zone);
+        if (!SpawnPedestrianForZone(zone))
+        {
+            Destroy(zoneObj);
+            activeZone = null;
+            return false;
+        }
+
+        return true;
     }
 
-    void SpawnPedestrianForZone(PedestrianCrosswalkZone zone)
+    bool SpawnPedestrianForZone(PedestrianCrosswalkZone zone)
     {
-        if (zone == null) return;
-        if (!zone.CanSpawnPedestrian()) return;
+        if (zone == null)
+            return false;
 
-        zone.GetSpawnPath(out Transform startPoint, out Transform endPoint);
+        if (!zone.CanSpawnPedestrian())
+            return false;
+
+        zone.GetSpawnPath(
+            out Transform startPoint,
+            out Transform endPoint
+        );
 
         if (startPoint == null || endPoint == null)
         {
-            Debug.LogWarning("CrosswalkZone path belum lengkap. Pastikan start/end point terpasang.");
-            return;
+            Debug.LogWarning(
+                "Crosswalk path belum lengkap."
+            );
+
+            return false;
         }
 
-        // Spawn pedestrian sebagai CHILD dari zone
         GameObject pedestrianObj = Instantiate(
             pedestrianPrefab,
             zone.transform
         );
 
-        // Tempatkan di posisi local start point
-        pedestrianObj.transform.localPosition = startPoint.localPosition;
-        pedestrianObj.transform.localRotation = Quaternion.identity;
+        pedestrianObj.transform.localPosition =
+            startPoint.localPosition;
 
-        PedestrianController controller = pedestrianObj.GetComponent<PedestrianController>();
+        pedestrianObj.transform.localRotation =
+            Quaternion.identity;
+
+        PedestrianController controller =
+            pedestrianObj.GetComponent<PedestrianController>();
+
         if (controller == null)
         {
-            Debug.LogWarning("Pedestrian prefab tidak punya PedestrianController.");
+            Debug.LogWarning(
+                "Pedestrian prefab tidak memiliki PedestrianController."
+            );
+
             Destroy(pedestrianObj);
-            return;
+            return false;
         }
 
-        controller.Setup(startPoint, endPoint, playerCar, zone);
+        controller.Setup(
+            startPoint,
+            endPoint,
+            playerCar,
+            zone
+        );
+
         zone.RegisterPedestrian(controller);
+
+        return true;
     }
 
-    void SetNextSpawnTime()
+    /// <summary>
+    /// Dipanggil PedestrianCrosswalkZone ketika event selesai.
+    /// </summary>
+    public void ClearActiveZone(PedestrianCrosswalkZone zone)
     {
-        nextSpawnTime = Random.Range(minSpawnInterval, maxSpawnInterval);
+        if (activeZone == zone)
+        {
+            activeZone = null;
+        }
+    }
+
+    public bool HasActiveCrosswalk()
+    {
+        return activeZone != null;
+    }
+
+    public PedestrianCrosswalkZone GetActiveZone()
+    {
+        return activeZone;
     }
 }

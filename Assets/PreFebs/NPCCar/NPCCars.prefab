@@ -320,7 +320,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCCrosswalkQueue
   detectionRange: 1
-  sensorRadius: 1.2
+  sensorRadius: 0.4
   sensorHeightOffset: 0
   npcLayerMask:
     serializedVersion: 2

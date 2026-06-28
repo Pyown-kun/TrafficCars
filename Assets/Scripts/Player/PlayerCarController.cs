@@ -17,6 +17,8 @@ public class PlayerCarController : MonoBehaviour
     [Header("Crosswalk Lock")]
     [SerializeField] private bool movementLockedByCrosswalk = false;
 
+    private bool insideCrosswalkNoStopZone;
+
     private void Update()
     {
         if (Time.timeScale == 0f)
@@ -146,5 +148,15 @@ public class PlayerCarController : MonoBehaviour
     public bool CanMove()
     {
         return canMove;
+    }
+
+    public bool IsInsideCrosswalkNoStopZone()
+    {
+        return insideCrosswalkNoStopZone;
+    }
+
+    public void SetInsideCrosswalkNoStopZone(bool value)
+    {
+        insideCrosswalkNoStopZone = value;
     }
 }

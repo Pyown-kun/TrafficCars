@@ -778,10 +778,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 520199116242ea740a382fb6f2ebc8ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldSpeedManager
-  currentWorldSpeed: 10
-  normalWorldSpeed: 10
-  brakeWorldSpeed: 3
-  brakeAcceleration: 12
+  currentWorldSpeed: 15
+  normalWorldSpeed: 15
+  brakeWorldSpeed: 4
+  brakeAcceleration: 8
   recoverAcceleration: 8
 --- !u!1 &1267529379
 GameObject:

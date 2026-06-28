@@ -306,4 +306,12 @@ public class PedestrianCrosswalkZone : MonoBehaviour
                 leftEndPoint.position);
         }
     }
+
+    public bool IsPlayerFrozen()
+    {
+        if (playerCar == null)
+            return false;
+
+        return playerCar.IsMovementLockedByCrosswalk();
+    }
 }

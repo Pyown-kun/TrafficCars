@@ -38,6 +38,18 @@ public class NPCCarController : MonoBehaviour
     [Range(0f, 1f)]
     public float crosswalkCautiousBrakeMultiplier = 0.5f;
 
+    [Header("Same Direction Transition")]
+
+    [Tooltip("Percepatan menuju target speed")]
+    public float accelerateRate = 8f;
+
+    [Tooltip("Perlambatan menuju target speed")]
+    public float decelerateRate = 5f;
+
+    private float currentSameDirectionSpeed;
+    private float cachedBrakeWorldSpeed;
+    private bool previousBrake;
+
     //====================================================
 
     [Header("Destroy Range")]
@@ -59,9 +71,14 @@ public class NPCCarController : MonoBehaviour
 
     //====================================================
 
+    private bool insideNoStopZone;
+
     private void Start()
     {
         spawnZ = transform.position.z;
+
+        currentSameDirectionSpeed =
+            WorldSpeed * sameDirectionSpeedMultiplier;
     }
 
     /// <summary>
@@ -89,6 +106,13 @@ public class NPCCarController : MonoBehaviour
 
         bool isBraking = playerCar.IsBraking();
 
+        if (isBraking && !previousBrake)
+        {
+            cachedBrakeWorldSpeed = WorldSpeed;
+        }
+
+        previousBrake = isBraking;
+
         switch (trafficType)
         {
             case TrafficType.SameDirection:
@@ -114,18 +138,54 @@ public class NPCCarController : MonoBehaviour
 
         void HandleSameDirectionNPC(bool isBraking, bool crosswalkActive)
     {
+        float targetSpeed;
+
+        //--------------------------------------------------
+        // Menentukan target speed
+        //--------------------------------------------------
+
         if (isBraking)
         {
-            float brakeSpeed =
-                WorldSpeed * sameDirectionBrakeMultiplier;
+            targetSpeed =
+                cachedBrakeWorldSpeed *
+                sameDirectionBrakeMultiplier;
 
             if (crosswalkActive)
             {
-                brakeSpeed *= crosswalkCautiousBrakeMultiplier;
+                targetSpeed *= crosswalkCautiousBrakeMultiplier;
             }
+        }
+        else
+        {
+            targetSpeed =
+                WorldSpeed *
+                sameDirectionSpeedMultiplier;
+        }
 
+        //--------------------------------------------------
+        // Acceleration / Deceleration
+        //--------------------------------------------------
+
+        float rate =
+            targetSpeed > currentSameDirectionSpeed
+            ? accelerateRate
+            : decelerateRate;
+
+        currentSameDirectionSpeed = Mathf.MoveTowards(
+            currentSameDirectionSpeed,
+            targetSpeed,
+            rate * Time.deltaTime);
+
+        //--------------------------------------------------
+        // Movement
+        //--------------------------------------------------
+
+        if (isBraking)
+        {
             transform.Translate(
-                Vector3.forward * brakeSpeed * Time.deltaTime,
+                Vector3.forward *
+                currentSameDirectionSpeed *
+                Time.deltaTime,
                 Space.World);
 
             if (hasMovedBackwardFromSpawn &&
@@ -143,11 +203,10 @@ public class NPCCarController : MonoBehaviour
         }
         else
         {
-            float moveSpeed =
-                WorldSpeed * sameDirectionSpeedMultiplier;
-
             transform.Translate(
-                Vector3.back * moveSpeed * Time.deltaTime,
+                Vector3.back *
+                currentSameDirectionSpeed *
+                Time.deltaTime,
                 Space.World);
 
             if (transform.position.z < spawnZ)
@@ -253,5 +312,15 @@ public class NPCCarController : MonoBehaviour
         // Reset seluruh status crosswalk
         stoppedByCrosswalk = false;
         currentCrosswalkZone = null;
+    }
+
+    public bool IsInsideNoStopZone()
+    {
+        return insideNoStopZone;
+    }
+
+    public void SetInsideNoStopZone(bool value)
+    {
+        insideNoStopZone = value;
     }
 }

@@ -59,15 +59,20 @@ public class PedestrianController : MonoBehaviour
         }
     }
 
-    void HandleWaiting()
+   void HandleWaiting()
     {
-        if (playerCar == null) return;
+        if (playerCar == null)
+            return;
 
-        // Penyebrang baru jalan jika zone sedang dekat player,
-        // player ngerem, dan ambulance tidak memblokir
-        if (!crosswalkZone.IsPlayerNearCrosswalk()) return;
-        if (!playerCar.IsBraking()) return;
-        if (crosswalkZone.IsAmbulanceBlocking()) return;
+        if (!crosswalkZone.IsPlayerNearCrosswalk())
+            return;
+
+        if (crosswalkZone.IsAmbulanceBlocking())
+            return;
+
+        // Player harus benar-benar sudah freeze
+        if (!crosswalkZone.IsPlayerFrozen())
+            return;
 
         currentState = PedestrianState.Crossing;
     }

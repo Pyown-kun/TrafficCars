@@ -49,9 +49,11 @@ public class RearCrosswalkTrafficTrigger : MonoBehaviour
 
         // Player hanya berhenti jika sedang brake
         // dan masih berada di area Rear Trigger.
-        if (playerInside && crosswalkZone.playerCar.IsBraking())
+        if (playerInside &&
+            !crosswalkZone.playerCar.IsInsideCrosswalkNoStopZone() &&
+            crosswalkZone.playerCar.IsBraking() &&
+            crosswalkZone.CanFreezePlayer())
         {
-            crosswalkZone.playerCar.SetCrosswalkMovementLock(true);
             crosswalkZone.FreezeCrosswalkForCrossing();
         }
         else

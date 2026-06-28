@@ -33,7 +33,14 @@ public class FrontCrosswalkTrafficTrigger : MonoBehaviour
             if (npc == null)
                 continue;
 
-            npc.SetStoppedByCrosswalk(true, crosswalkZone);
+            if(!npc.IsInsideNoStopZone())
+            {
+                npc.SetStoppedByCrosswalk(true, crosswalkZone);
+            }
+            else
+            {
+                npc.SetStoppedByCrosswalk(false);
+            }
         }
     }
 

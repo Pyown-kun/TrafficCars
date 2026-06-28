@@ -272,12 +272,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCCarController
   trafficType: 1
   laneId: 0
-  sameDirectionMoveSpeed: 10
-  towardPlayerMoveSpeed: 18
-  crosswalkMoveSpeed: 12
-  sameDirectionBrakeSpeed: 10.5
-  towardPlayerBrakeMultiplier: 0.85
+  sameDirectionSpeedMultiplier: 0.65
+  towardPlayerSpeedMultiplier: 1.65
+  crosswalkSpeedMultiplier: 1
+  sameDirectionBrakeMultiplier: 1.3
   crosswalkCautiousBrakeMultiplier: 0
+  accelerateRate: 8
+  decelerateRate: 5
   destroyBackZ: -30
   destroyFrontZ: 120
   playerCar: {fileID: 0}

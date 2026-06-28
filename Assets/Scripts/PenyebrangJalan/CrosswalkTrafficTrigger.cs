@@ -84,9 +84,10 @@ public class CrosswalkTrafficTrigger : MonoBehaviour
         // - sedang brake
         // - kecepatan dunia sudah cukup rendah
         // =========================================================
-        if (playerInside &&
-            crosswalkZone.playerCar.IsBraking() &&
-            crosswalkZone.CanFreezePlayer())
+        if(playerInside &&
+        !crosswalkZone.playerCar.IsInsideCrosswalkNoStopZone() &&
+        crosswalkZone.playerCar.IsBraking() &&
+        crosswalkZone.CanFreezePlayer())
         {
             crosswalkZone.FreezeCrosswalkForCrossing();
         }

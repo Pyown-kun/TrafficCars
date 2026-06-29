@@ -129,6 +129,7 @@ GameObject:
   - component: {fileID: 9056223068020155182}
   - component: {fileID: -3632343072336005309}
   - component: {fileID: 5364117254949213220}
+  - component: {fileID: -1568129912809560252}
   m_Layer: 7
   m_Name: NPCCars
   m_TagString: NPCCar
@@ -303,6 +304,7 @@ MonoBehaviour:
   laneWidth: 1.5
   mergeDuration: 1.5
   maxTurnAngle: -15
+  mergeCheckRadius: 12
   sensorLineRenderer: {fileID: 0}
   stateLabel: {fileID: 0}
   showSensorGizmo: 1
@@ -347,6 +349,20 @@ MonoBehaviour:
   swervingSprite: {fileID: 21300000, guid: 4db15b4ecd33c8d4eb9e2f8d2952bac7, type: 3}
   verticalOffset: 1.5
   billboardCamera: {fileID: 0}
+--- !u!114 &-1568129912809560252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4097823041792240074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61c2493d71cddd840973c3a2acd72a62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCMergeAssistant
+  forwardMultiplier: 1.2
+  rearMultiplier: 0.75
 --- !u!1 &4217860462270293764
 GameObject:
   m_ObjectHideFlags: 0

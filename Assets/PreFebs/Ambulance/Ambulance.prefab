@@ -126,10 +126,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed5f1fa05d0eb8d4293bfde794140df1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbulanceController
-  moveSpeed: 16
-  destroyFrontZ: 50
   playerCar: {fileID: 0}
+  speedMultiplier: 1.12
   brakeSpeedMultiplier: 1.8
+  accelerateRate: 10
+  decelerateRate: 8
+  destroyFrontZ: 50
   laneId: 1
 --- !u!54 &-5110862053195258647
 Rigidbody:

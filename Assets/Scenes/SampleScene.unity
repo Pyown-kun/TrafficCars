@@ -296,6 +296,50 @@ MonoBehaviour:
   bannerRoot: {fileID: 1906372313}
   warningText: {fileID: 0}
   warningMessage: AMBULANCE MENDEKAT DARI BELAKANG!
+--- !u!1 &603027033
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 603027035}
+  - component: {fileID: 603027034}
+  m_Layer: 0
+  m_Name: LaneRegistry
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &603027034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 603027033}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34ae820ea34ae5b43bd53b17a53e2f68, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LaneRegistry
+--- !u!4 &603027035
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 603027033}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &604305611
 GameObject:
   m_ObjectHideFlags: 0
@@ -1117,6 +1161,51 @@ MonoBehaviour:
   playAfterBrakeTrigger: PlayAfterBrake
   turnThreshold: 0.1
   horizontalSmoothSpeed: 12
+--- !u!1 &1487195675
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1487195677}
+  - component: {fileID: 1487195676}
+  m_Layer: 0
+  m_Name: MergeCoordinator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1487195676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487195675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae4e886c36ef4e542a78e002176f58d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MergeCoordinator
+  checkInterval: 0.05
+--- !u!4 &1487195677
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487195675}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1491936238
 GameObject:
   m_ObjectHideFlags: 0
@@ -1704,3 +1793,5 @@ SceneRoots:
   - {fileID: 1579909743}
   - {fileID: 2068677030}
   - {fileID: 1096405325}
+  - {fileID: 603027035}
+  - {fileID: 1487195677}

@@ -1191,6 +1191,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MergeCoordinator
   checkInterval: 0.05
+  desiredFrontGap: 8
+  desiredRearGap: 8
+  showDebugLog: 0
 --- !u!4 &1487195677
 Transform:
   m_ObjectHideFlags: 0

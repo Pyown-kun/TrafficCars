@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: -3632343072336005309}
   - component: {fileID: 5364117254949213220}
   - component: {fileID: -1568129912809560252}
+  - component: {fileID: 8258001061120058072}
   m_Layer: 7
   m_Name: NPCCars
   m_TagString: NPCCar
@@ -363,6 +364,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCMergeAssistant
   forwardMultiplier: 1.2
   rearMultiplier: 0.75
+--- !u!114 &8258001061120058072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4097823041792240074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5953cabfe1416194ea0e3f98a71a63e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NPCGapSensor
+  gapDetectionRadius: 12
+  desiredFrontGap: 3
+  desiredRearGap: 3
+  showDebugLog: 1
 --- !u!1 &4217860462270293764
 GameObject:
   m_ObjectHideFlags: 0

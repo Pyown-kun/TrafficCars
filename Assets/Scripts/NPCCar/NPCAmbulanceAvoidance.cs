@@ -4,10 +4,18 @@ using UnityEngine;
 /// NPC Ambulance Avoidance
 ///
 /// Mengatur state machine NPC ketika ambulance mendekat.
-/// Script ini tidak menggerakkan kendaraan.
-/// Seluruh movement tetap dilakukan oleh NPCCarController.
+/// Script ini hanya:
+///
+/// • mendeteksi ambulance
+/// • membuat MergeReservation
+/// • meminta NPCGapSensor mengecek gap
+/// • melakukan animasi merge
+///
+/// Seluruh perhitungan gap sekarang dipindahkan
+/// ke NPCGapSensor.
 /// </summary>
 [RequireComponent(typeof(NPCCarController))]
+[RequireComponent(typeof(NPCGapSensor))]
 public class NPCAmbulanceAvoidance : MonoBehaviour
 {
     //========================================================
@@ -27,18 +35,14 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
     // SENSOR
     //========================================================
 
-    [Header("Sensor")]
+    [Header("Ambulance Sensor")]
 
-    [Tooltip("Jarak deteksi ambulance.")]
     public float detectionRange = 25f;
 
-    [Tooltip("Offset origin raycast.")]
     public float sensorHeightOffset = 0.5f;
 
-    [Tooltip("Radius SphereCast.")]
     public float sensorRadius = 1.2f;
 
-    [Tooltip("Layer ambulance.")]
     public LayerMask ambulanceLayerMask = ~0;
 
     //========================================================
@@ -54,12 +58,11 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
     public float maxTurnAngle = 15f;
 
     //========================================================
-    // COOPERATIVE MERGE
+    // RESERVATION
     //========================================================
 
-    [Header("Cooperative Merge")]
+    [Header("Reservation")]
 
-    [Tooltip("Radius reservation pada lane tujuan.")]
     public float mergeCheckRadius = 12f;
 
     //========================================================
@@ -73,7 +76,7 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
     public TextMesh stateLabel;
 
     //========================================================
-    // GIZMO
+    // DEBUG
     //========================================================
 
     [Header("Debug")]
@@ -83,20 +86,21 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
     public bool alwaysShowGizmoRay = true;
 
     //========================================================
-    // PROPERTY
-    //========================================================
 
     public AvoidanceState CurrentState
     {
         get;
         private set;
-    } = AvoidanceState.Normal;
+    }
+    = AvoidanceState.Normal;
 
     //========================================================
     // COMPONENT
     //========================================================
 
     private NPCCarController npcController;
+
+    private NPCGapSensor gapSensor;
 
     private AmbulanceController detectedAmbulance;
 
@@ -114,8 +118,6 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
 
     private LaneMarker.LaneId mergeTargetLane;
 
-    private float waitingTimer;
-    public float maxWaitingTime = 1.5f;
     //========================================================
     // REGISTRY
     //========================================================
@@ -148,6 +150,9 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
     {
         npcController =
             GetComponent<NPCCarController>();
+
+        gapSensor =
+            GetComponent<NPCGapSensor>();
     }
 
     private void OnDisable()
@@ -204,9 +209,6 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
 
     private void Update()
     {
-
-        waitingTimer = 0f;
-
         if (Time.timeScale == 0f)
             return;
 
@@ -216,15 +218,11 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
         EnsureRegistered();
 
         bool triggerLane =
-            npcController.laneId ==
-            LaneMarker.LaneId.Lane2 ||
-
-            npcController.laneId ==
-            LaneMarker.LaneId.Lane4;
+            npcController.laneId == LaneMarker.LaneId.Lane2 ||
+            npcController.laneId == LaneMarker.LaneId.Lane4;
 
         if (!triggerLane &&
-            CurrentState ==
-            AvoidanceState.Normal)
+            CurrentState == AvoidanceState.Normal)
         {
             UpdateVisuals();
             return;
@@ -262,7 +260,7 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
         UpdateVisuals();
     }
 
-        //========================================================
+    //========================================================
     // NORMAL
     //========================================================
 
@@ -310,555 +308,570 @@ public class NPCAmbulanceAvoidance : MonoBehaviour
     //========================================================
     // WAITING FOR GAP
     //========================================================
-
     void TickWaitingForGap()
+{
+    //----------------------------------------------------
+    // Ambulance sudah tidak relevan
+    //----------------------------------------------------
+
+    if (!IsAmbulanceStillRelevant())
     {
+        RemoveReservation();
 
-        waitingTimer += Time.deltaTime;
+        detectedAmbulance = null;
 
-        if (!IsAmbulanceStillRelevant())
-        {
-            RemoveReservation();
+        CurrentState =
+            AvoidanceState.Normal;
 
-            detectedAmbulance = null;
+        return;
+    }
 
-            CurrentState =
-                AvoidanceState.Normal;
+    //----------------------------------------------------
+    // Reservation selalu mengikuti posisi NPC
+    //----------------------------------------------------
 
-            return;
-        }
+    UpdateReservation();
 
-        //------------------------------------------
-        // Reservation selalu mengikuti posisi NPC
-        //------------------------------------------
-
-        UpdateReservation();
-
+    if (reservation != null)
+    {
         LaneRegistry.Instance.UpdateReservation(
             reservation);
-
-        //------------------------------------------
-        // Cari blocker pada lane tujuan
-        //------------------------------------------
-
-        LaneMarker.LaneId targetLane =
-            LaneMarker.GetMergeTargetLane(
-                npcController.laneId);
-
-        NPCCarController frontNpc =
-            LaneRegistry.Instance.FindClosestAhead(
-                targetLane,
-                transform.position.z,
-                npcController);
-
-        NPCCarController rearNpc =
-            LaneRegistry.Instance.FindClosestBehind(
-                targetLane,
-                transform.position.z,
-                npcController);
-
-        bool frontReady = true;
-        bool rearReady = true;
-
-        if (frontNpc != null)
-        {
-            float frontGap =
-                transform.position.z -
-                frontNpc.transform.position.z;
-
-            frontReady = frontGap >= 7f;
-        }
-
-        if (rearNpc != null)
-        {
-            float rearGap =
-                rearNpc.transform.position.z -
-                transform.position.z;
-
-            rearReady = rearGap >= 7f;
-        }
-
-        if (frontReady && rearReady)
-        {
-            StartMerge(targetLane);
-        }
     }
+
+    //----------------------------------------------------
+    // Pastikan Gap Sensor tersedia
+    //----------------------------------------------------
+
+    if (gapSensor == null)
+    {
+        Debug.LogWarning(
+            $"{name} tidak memiliki NPCGapSensor.");
+
+        return;
+    }
+
+    //----------------------------------------------------
+    // Sinkronkan target lane ke Gap Sensor
+    //----------------------------------------------------
+
+    LaneMarker.LaneId targetLane =
+        LaneMarker.GetMergeTargetLane(
+            npcController.laneId);
+
+    gapSensor.SetTargetLane(
+        targetLane);
+
+    //----------------------------------------------------
+    // Cukup tanya Gap Sensor
+    //----------------------------------------------------
+
+    if (!gapSensor.IsGapAvailable())
+    {
+        return;
+    }
+
+    //----------------------------------------------------
+    // Gap sudah tersedia
+    //----------------------------------------------------
+
+    StartMerge(targetLane);
+}
 
     //========================================================
     // START MERGE
     //========================================================
 
-    void StartMerge(
-        LaneMarker.LaneId targetLane)
+void StartMerge(
+    LaneMarker.LaneId targetLane)
+{
+    mergeTargetLane =
+        targetLane;
+
+    mergeDirectionSign =
+        LaneMarker.GetMergeDirectionSign(
+            npcController.laneId);
+
+    mergeStartX =
+        transform.position.x;
+
+    mergeTargetX =
+        mergeStartX +
+        mergeDirectionSign *
+        laneWidth;
+
+    mergeTimer = 0f;
+
+    //----------------------------------------------------
+    // Reservation selesai dipakai.
+    //----------------------------------------------------
+
+    if (reservation != null)
     {
-        mergeTargetLane =
-            targetLane;
-
-        mergeDirectionSign =
-            LaneMarker.GetMergeDirectionSign(
-                npcController.laneId);
-
-        mergeStartX =
-            transform.position.x;
-
-        mergeTargetX =
-            mergeStartX +
-            mergeDirectionSign * laneWidth;
-
-        mergeTimer = 0f;
-
-        //------------------------------------------
-        // Beritahu coordinator bahwa merge dimulai
-        //------------------------------------------
-
-        if (reservation != null)
-        {
-            LaneRegistry.Instance.NotifyMergeStarted(
-                reservation);
-        }
-
-        CurrentState =
-            AvoidanceState.Merging;
+        LaneRegistry.Instance.NotifyMergeStarted(
+            reservation);
     }
 
-        //========================================================
+    CurrentState =
+        AvoidanceState.Merging;
+}
+
+    //========================================================
     // MERGING
     //========================================================
 
-    void TickMerging()
+void TickMerging()
+{
+    mergeTimer += Time.deltaTime;
+
+    float t =
+        Mathf.Clamp01(
+            mergeTimer /
+            mergeDuration);
+
+    //----------------------------------------------------
+    // Interpolasi posisi X
+    //----------------------------------------------------
+
+    Vector3 pos =
+        transform.position;
+
+    pos.x =
+        Mathf.Lerp(
+            mergeStartX,
+            mergeTargetX,
+            t);
+
+    transform.position =
+        pos;
+
+    //----------------------------------------------------
+    // Animasi belok
+    //----------------------------------------------------
+
+    float turn =
+        Mathf.Sin(
+            t * Mathf.PI)
+        * maxTurnAngle
+        * mergeDirectionSign;
+
+    transform.rotation =
+        Quaternion.Euler(
+            0f,
+            GetBaseYRotation() + turn,
+            0f);
+
+    //----------------------------------------------------
+
+    if (t >= 1f)
     {
-        mergeTimer += Time.deltaTime;
-
-        float t =
-            Mathf.Clamp01(
-                mergeTimer /
-                mergeDuration);
-
-        //------------------------------------------
-        // Lerp posisi X
-        //------------------------------------------
-
-        float newX =
-            Mathf.Lerp(
-                mergeStartX,
-                mergeTargetX,
-                t);
-
-        Vector3 pos =
-            transform.position;
-
-        pos.x = newX;
-
-        transform.position = pos;
-
-        //------------------------------------------
-        // Rotasi kendaraan
-        //------------------------------------------
-
-        float turn =
-            Mathf.Sin(t * Mathf.PI) *
-            maxTurnAngle *
-            mergeDirectionSign;
-
-        transform.rotation =
-            Quaternion.Euler(
-                0f,
-                GetBaseYRotation() + turn,
-                0f);
-
-        //------------------------------------------
-
-        if (t >= 1f)
-        {
-            FinishMerge();
-        }
+        FinishMerge();
     }
+}
 
     //========================================================
     // BASE ROTATION
     //========================================================
 
-    float GetBaseYRotation()
+float GetBaseYRotation()
+{
+    if (!baseYRotationCached)
     {
-        if (!baseYRotationCached)
-        {
-            baseYRotationCache =
-                transform.eulerAngles.y;
+        baseYRotationCache =
+            transform.eulerAngles.y;
 
-            baseYRotationCached = true;
-        }
-
-        return baseYRotationCache;
+        baseYRotationCached = true;
     }
+
+    return baseYRotationCache;
+}
 
     //========================================================
     // FINISH MERGE
     //========================================================
-
     void FinishMerge()
+{
+    //----------------------------------------------------
+    // Snap posisi akhir
+    //----------------------------------------------------
+
+    Vector3 pos =
+        transform.position;
+
+    pos.x =
+        mergeTargetX;
+
+    transform.position =
+        pos;
+
+    transform.rotation =
+        Quaternion.Euler(
+            0f,
+            GetBaseYRotation(),
+            0f);
+
+    //----------------------------------------------------
+    // Update Lane Registry
+    //----------------------------------------------------
+
+    LaneRegistry.Instance.Unregister(
+        npcController);
+
+    npcController.laneId =
+        mergeTargetLane;
+
+    LaneRegistry.Instance.Register(
+        npcController);
+
+    registeredLane =
+        mergeTargetLane;
+
+    //----------------------------------------------------
+    // Sinkronkan behaviour NPC
+    //----------------------------------------------------
+
+    switch (mergeTargetLane)
     {
-        //------------------------------------------
-        // Snap posisi akhir
-        //------------------------------------------
+        case LaneMarker.LaneId.Lane1:
 
-        Vector3 pos =
-            transform.position;
+            npcController.ApplySameDirectionBehavior();
+            break;
 
-        pos.x =
-            mergeTargetX;
+        case LaneMarker.LaneId.Lane5:
 
-        transform.position =
-            pos;
-
-        transform.rotation =
-            Quaternion.Euler(
-                0f,
-                GetBaseYRotation(),
-                0f);
-
-        //------------------------------------------
-        // Update Lane Registry
-        //------------------------------------------
-
-        LaneRegistry.Instance.Unregister(
-            npcController);
-
-        npcController.laneId =
-            mergeTargetLane;
-
-        LaneRegistry.Instance.Register(
-            npcController);
-
-        registeredLane =
-            mergeTargetLane;
-
-        //------------------------------------------
-        // Sinkronisasi behaviour lane baru
-        //------------------------------------------
-
-        switch (mergeTargetLane)
-        {
-            case LaneMarker.LaneId.Lane1:
-
-                npcController.ApplySameDirectionBehavior();
-                break;
-
-            case LaneMarker.LaneId.Lane5:
-
-                // Lane5 tetap menggunakan
-                // behaviour TowardPlayer.
-                break;
-        }
-
-        //------------------------------------------
-        // Bersihkan reservation
-        //------------------------------------------
-
-        RemoveReservation();
-
-        //------------------------------------------
-
-        detectedAmbulance = null;
-
-        mergeTimer = 0f;
-
-        baseYRotationCached = false;
-
-        CurrentState =
-            AvoidanceState.Merged;
+            // Tetap TowardPlayer
+            break;
     }
+
+    //----------------------------------------------------
+    // Bersihkan reservation
+    //----------------------------------------------------
+
+    RemoveReservation();
+
+    //----------------------------------------------------
+
+    detectedAmbulance = null;
+
+    mergeTimer = 0f;
+
+    baseYRotationCached = false;
+
+    CurrentState =
+        AvoidanceState.Merged;
+}
 
     //========================================================
     // DETECT AMBULANCE
     //========================================================
 
-    AmbulanceController DetectAmbulance()
+AmbulanceController DetectAmbulance()
+{
+    Vector3 origin =
+        transform.position +
+        Vector3.up *
+        sensorHeightOffset;
+
+    RaycastHit[] hits =
+        Physics.SphereCastAll(
+            origin,
+            sensorRadius,
+            Vector3.back,
+            detectionRange,
+            ambulanceLayerMask);
+
+    AmbulanceController closest =
+        null;
+
+    float closestDistance =
+        float.MaxValue;
+
+    foreach (RaycastHit hit in hits)
     {
-        Vector3 direction =
-            Vector3.back;
+        if (!hit.collider.CompareTag("Ambulance"))
+            continue;
 
-        Vector3 origin =
-            transform.position +
-            Vector3.up *
-            sensorHeightOffset;
+        AmbulanceController ambulance =
+            hit.collider.GetComponent<AmbulanceController>();
 
-        RaycastHit[] hits =
-            Physics.SphereCastAll(
-                origin,
-                sensorRadius,
-                direction,
-                detectionRange,
-                ambulanceLayerMask);
+        if (ambulance == null)
+            continue;
 
-        AmbulanceController closest = null;
-
-        float closestDistance =
-            float.MaxValue;
-
-        foreach (RaycastHit hit in hits)
+        if (hit.distance < closestDistance)
         {
-            if (!hit.collider.CompareTag("Ambulance"))
-                continue;
+            closestDistance =
+                hit.distance;
 
-            AmbulanceController ambulance =
-                hit.collider.GetComponent<AmbulanceController>();
-
-            if (ambulance == null)
-                continue;
-
-            if (hit.distance < closestDistance)
-            {
-                closestDistance =
-                    hit.distance;
-
-                closest =
-                    ambulance;
-            }
+            closest =
+                ambulance;
         }
-
-        return closest;
     }
+
+    return closest;
+}
 
     //========================================================
     // VISUAL
     //========================================================
 
-    void UpdateVisuals()
+void UpdateVisuals()
+{
+    if (sensorLineRenderer != null)
     {
-        if (sensorLineRenderer != null)
+        bool show =
+            detectedAmbulance != null &&
+            CurrentState != AvoidanceState.Merged;
+
+        sensorLineRenderer.enabled =
+            show;
+
+        if (show)
         {
-            bool show =
-                detectedAmbulance != null &&
-                CurrentState != AvoidanceState.Merged;
+            sensorLineRenderer.positionCount = 2;
 
-            sensorLineRenderer.enabled = show;
+            sensorLineRenderer.SetPosition(
+                0,
+                transform.position);
 
-            if (show)
-            {
-                sensorLineRenderer.positionCount = 2;
-
-                sensorLineRenderer.SetPosition(
-                    0,
-                    transform.position);
-
-                sensorLineRenderer.SetPosition(
-                    1,
-                    detectedAmbulance.transform.position);
-
-                Color color = Color.white;
-
-                switch (CurrentState)
-                {
-                    case AvoidanceState.AmbulanceDetected:
-                        color = Color.yellow;
-                        break;
-
-                    case AvoidanceState.WaitingForGap:
-                        color = new Color(1f, 0.5f, 0f);
-                        break;
-
-                    case AvoidanceState.Merging:
-                        color = Color.cyan;
-                        break;
-                }
-
-                sensorLineRenderer.startColor =
-                    color;
-
-                sensorLineRenderer.endColor =
-                    color;
-            }
-        }
-
-        if (stateLabel != null)
-        {
-            stateLabel.text =
-                CurrentState.ToString();
-        }
-    }
-
-        //========================================================
-    // GIZMO
-    //========================================================
-
-    private void OnDrawGizmos()
-    {
-        if (!showSensorGizmo)
-            return;
-
-        if (npcController == null)
-            npcController =
-                GetComponent<NPCCarController>();
-
-        if (npcController == null)
-            return;
-
-        bool triggerLane =
-            npcController.laneId == LaneMarker.LaneId.Lane2 ||
-            npcController.laneId == LaneMarker.LaneId.Lane4;
-
-        if (!triggerLane)
-            return;
-
-        Vector3 origin =
-            transform.position +
-            Vector3.up * sensorHeightOffset;
-
-        Vector3 end =
-            origin +
-            Vector3.back * detectionRange;
-
-        Color gizmoColor = Color.green;
-
-        switch (CurrentState)
-        {
-            case AvoidanceState.AmbulanceDetected:
-                gizmoColor = Color.yellow;
-                break;
-
-            case AvoidanceState.WaitingForGap:
-                gizmoColor = new Color(1f, 0.5f, 0f);
-                break;
-
-            case AvoidanceState.Merging:
-                gizmoColor = Color.cyan;
-                break;
-
-            case AvoidanceState.Merged:
-                gizmoColor = Color.green;
-                break;
-        }
-
-        Gizmos.color = gizmoColor;
-
-        Gizmos.DrawLine(origin, end);
-
-        Gizmos.DrawWireSphere(
-            origin,
-            sensorRadius);
-
-        Gizmos.DrawWireSphere(
-            end,
-            sensorRadius);
-
-        if (Application.isPlaying &&
-            detectedAmbulance != null)
-        {
-            Gizmos.DrawLine(
-                origin,
+            sensorLineRenderer.SetPosition(
+                1,
                 detectedAmbulance.transform.position);
 
-            Gizmos.DrawWireSphere(
-                detectedAmbulance.transform.position,
-                0.4f);
+            Color color =
+                Color.white;
+
+            switch (CurrentState)
+            {
+                case AvoidanceState.AmbulanceDetected:
+                    color = Color.yellow;
+                    break;
+
+                case AvoidanceState.WaitingForGap:
+                    color = new Color(1f, 0.5f, 0f);
+                    break;
+
+                case AvoidanceState.Merging:
+                    color = Color.cyan;
+                    break;
+            }
+
+            sensorLineRenderer.startColor =
+                color;
+
+            sensorLineRenderer.endColor =
+                color;
         }
     }
+
+    if (stateLabel != null)
+    {
+        stateLabel.text =
+            CurrentState.ToString();
+    }
+}
+
+    //========================================================
+    // GIZMO
+    //========================================================
+    private void OnDrawGizmos()
+{
+    if (!showSensorGizmo)
+        return;
+
+    if (npcController == null)
+        npcController =
+            GetComponent<NPCCarController>();
+
+    if (npcController == null)
+        return;
+
+    bool triggerLane =
+        npcController.laneId ==
+        LaneMarker.LaneId.Lane2 ||
+
+        npcController.laneId ==
+        LaneMarker.LaneId.Lane4;
+
+    if (!triggerLane)
+        return;
+
+    Vector3 origin =
+        transform.position +
+        Vector3.up *
+        sensorHeightOffset;
+
+    Vector3 end =
+        origin +
+        Vector3.back *
+        detectionRange;
+
+    Color gizmoColor =
+        Color.green;
+
+    switch (CurrentState)
+    {
+        case AvoidanceState.AmbulanceDetected:
+            gizmoColor = Color.yellow;
+            break;
+
+        case AvoidanceState.WaitingForGap:
+            gizmoColor = new Color(1f, 0.5f, 0f);
+            break;
+
+        case AvoidanceState.Merging:
+            gizmoColor = Color.cyan;
+            break;
+
+        case AvoidanceState.Merged:
+            gizmoColor = Color.green;
+            break;
+    }
+
+    Gizmos.color =
+        gizmoColor;
+
+    Gizmos.DrawLine(
+        origin,
+        end);
+
+    Gizmos.DrawWireSphere(
+        origin,
+        sensorRadius);
+
+    Gizmos.DrawWireSphere(
+        end,
+        sensorRadius);
+
+    if (Application.isPlaying &&
+        detectedAmbulance != null)
+    {
+        Gizmos.DrawLine(
+            origin,
+            detectedAmbulance.transform.position);
+
+        Gizmos.DrawWireSphere(
+            detectedAmbulance.transform.position,
+            0.4f);
+    }
+}
 
     //========================================================
     // RESERVATION
     //========================================================
 
-    void CreateMergeReservation()
-    {
-        if (reservationCreated)
-            return;
+void CreateMergeReservation()
+{
+    if (reservationCreated)
+        return;
 
-        LaneMarker.LaneId targetLane =
-            LaneMarker.GetMergeTargetLane(
-                npcController.laneId);
+    LaneMarker.LaneId targetLane =
+        LaneMarker.GetMergeTargetLane(
+            npcController.laneId);
 
-        reservation =
-            LaneRegistry.Instance.CreateReservation(
-                npcController,
-                targetLane,
-                mergeCheckRadius);
+    reservation =
+        LaneRegistry.Instance.CreateReservation(
+            npcController,
+            targetLane,
+            mergeCheckRadius);
 
-        reservationCreated = true;
-    }
+    reservationCreated = true;
+}
 
-    void UpdateReservation()
-    {
-        if (reservation == null)
-            return;
+void UpdateReservation()
+{
+    if (reservation == null)
+        return;
 
-        reservation.targetZ =
-            transform.position.z;
-    }
+    reservation.targetZ =
+        transform.position.z;
+}
 
-    void RemoveReservation()
-    {
-        if (reservation == null)
-            return;
+void RemoveReservation()
+{
+    if (reservation == null)
+        return;
 
-        LaneRegistry.Instance.RemoveReservation(
-            reservation);
+    LaneRegistry.Instance.RemoveReservation(
+        reservation);
 
-        reservation = null;
+    reservation = null;
 
-        reservationCreated = false;
-    }
+    reservationCreated = false;
+}
 
     //========================================================
     // HELPER
     //========================================================
 
-    bool IsAmbulanceStillRelevant()
-    {
-        if (detectedAmbulance == null)
-            return false;
+bool IsAmbulanceStillRelevant()
+{
+    if (detectedAmbulance == null)
+        return false;
 
-        float npcZ =
-            transform.position.z;
+    float npcZ =
+        transform.position.z;
 
-        float ambulanceZ =
-            detectedAmbulance.transform.position.z;
+    float ambulanceZ =
+        detectedAmbulance.transform.position.z;
 
-        // Ambulance masih dianggap relevan selama
-        // belum melewati NPC terlalu jauh.
+    return ambulanceZ <
+           npcZ + detectionRange;
+}
 
-        return ambulanceZ <
-               npcZ + detectionRange;
-    }
+/// <summary>
+/// Dipanggil oleh NPCCarController ketika NPCGapSensor
+/// menyatakan gap sudah aman.
+/// </summary>
+public void BeginMergeFromGapSensor()
+{
+    if (CurrentState != AvoidanceState.WaitingForGap)
+        return;
 
-    public bool HasActiveReservation()
-    {
-        return reservation != null &&
-               reservation.active;
-    }
+    LaneMarker.LaneId targetLane =
+        LaneMarker.GetMergeTargetLane(
+            npcController.laneId);
 
-    public MergeReservation GetReservation()
-    {
-        return reservation;
-    }
+    StartMerge(targetLane);
+}
 
-    public AmbulanceController GetDetectedAmbulance()
-    {
-        return detectedAmbulance;
-    }
+public bool HasActiveReservation()
+{
+    return reservation != null &&
+           reservation.active;
+}
 
-    public bool IsMerging()
-    {
-        return CurrentState ==
-               AvoidanceState.Merging;
-    }
+public MergeReservation GetReservation()
+{
+    return reservation;
+}
 
-    public bool IsWaitingGap()
-    {
-        return CurrentState ==
-               AvoidanceState.WaitingForGap;
-    }
+public AmbulanceController GetDetectedAmbulance()
+{
+    return detectedAmbulance;
+}
 
-    public void ForceCancelAvoidance()
-    {
-        RemoveReservation();
+public bool IsWaitingGap()
+{
+    return CurrentState ==
+           AvoidanceState.WaitingForGap;
+}
 
-        detectedAmbulance = null;
+public bool IsMerging()
+{
+    return CurrentState ==
+           AvoidanceState.Merging;
+}
 
-        mergeTimer = 0f;
+public void ForceCancelAvoidance()
+{
+    RemoveReservation();
 
-        baseYRotationCached = false;
+    detectedAmbulance = null;
 
-        CurrentState =
-            AvoidanceState.Normal;
-    }
+    mergeTimer = 0f;
+
+    baseYRotationCached = false;
+
+    CurrentState =
+        AvoidanceState.Normal;
+}
 }

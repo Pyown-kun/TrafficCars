@@ -160,10 +160,13 @@ public class NPCCarController : MonoBehaviour
     // UNITY
     //=========================================================
 
-    private void Awake()
+   private void Awake()
     {
         mergeAssistant =
             GetComponent<NPCMergeAssistant>();
+
+        gapSensor =
+            GetComponent<NPCGapSensor>();
 
         ambulanceAvoidance =
             GetComponent<NPCAmbulanceAvoidance>();
@@ -182,6 +185,27 @@ public class NPCCarController : MonoBehaviour
     }
 
     //---------------------------------------------------------
+
+    //====================================================
+    // GAP SENSOR
+    //====================================================
+
+    void HandleGapMerge()
+    {
+        if (gapSensor == null)
+            return;
+
+        if (ambulanceAvoidance == null)
+            return;
+
+        if (!ambulanceAvoidance.IsWaitingGap())
+            return;
+
+        if (!gapSensor.IsGapAvailable())
+            return;
+
+        ambulanceAvoidance.BeginMergeFromGapSensor();
+    }
 
     private void OnEnable()
     {
@@ -209,6 +233,8 @@ public class NPCCarController : MonoBehaviour
 
         if (playerCar == null)
             return;
+
+            HandleGapMerge();
 
         bool braking =
             playerCar.IsBraking();
@@ -597,6 +623,12 @@ public class NPCCarController : MonoBehaviour
 
         return mergeAssistant.IsRearAssist();
     }
+
+    //====================================================
+    // GAP SENSOR
+    //====================================================
+
+    private NPCGapSensor gapSensor;
 
     //=========================================================
     // SPEED API

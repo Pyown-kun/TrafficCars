@@ -1453,6 +1453,13 @@ MonoBehaviour:
     vehicleDamage: 20
     tofuDamage: 10
     slowdown: 7
+  - tagName: Ambulance
+    layerMask:
+      serializedVersion: 2
+      m_Bits: 192
+    vehicleDamage: 50
+    tofuDamage: 50
+    slowdown: 7
   collisionCooldown: 0.5
 --- !u!1 &1472675461
 GameObject:

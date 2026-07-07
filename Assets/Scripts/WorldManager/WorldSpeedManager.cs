@@ -21,6 +21,11 @@ public class WorldSpeedManager : MonoBehaviour
 
     private bool braking;
 
+    [Header("Collision Slowdown")]
+    [SerializeField] private float collisionRecoverAcceleration = 5f;
+
+    private float collisionPenalty;
+
     private void Awake()
     {
         if (Instance == null)
@@ -37,6 +42,12 @@ public class WorldSpeedManager : MonoBehaviour
             ? brakeWorldSpeed
             : normalWorldSpeed;
 
+        // Kurangi target speed akibat tabrakan
+        targetSpeed -= collisionPenalty;
+
+        // Jangan sampai negatif
+        targetSpeed = Mathf.Max(0f, targetSpeed);
+
         float accel = braking
             ? brakeAcceleration
             : recoverAcceleration;
@@ -45,6 +56,12 @@ public class WorldSpeedManager : MonoBehaviour
             currentWorldSpeed,
             targetSpeed,
             accel * Time.deltaTime);
+
+        collisionPenalty = Mathf.MoveTowards(
+            collisionPenalty,
+            0f,
+            collisionRecoverAcceleration * Time.deltaTime);
+
     }
 
     public void SetBraking(bool value)
@@ -68,5 +85,15 @@ public class WorldSpeedManager : MonoBehaviour
             return 1f;
 
         return currentWorldSpeed / normalWorldSpeed;
+    }
+
+    public void ApplyCollisionSlowdown(float slowdown)
+    {
+        collisionPenalty += slowdown;
+
+        collisionPenalty = Mathf.Clamp(
+            collisionPenalty,
+            0f,
+            normalWorldSpeed - brakeWorldSpeed);
     }
 }

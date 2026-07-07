@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class LevelTimer : MonoBehaviour
 {
@@ -16,11 +16,10 @@ public class LevelTimer : MonoBehaviour
     [Header("UI")]
     [SerializeField] private Image progressImage;
 
-    [Header("Optional")]
+    [Header("Pause Settings")]
     [SerializeField] private bool useGraceTime = true;
 
-    [SerializeField]
-    private float graceTime = 2f;
+    [SerializeField] private float graceTime = 2f;
 
     public event Action OnTimerFinished;
 
@@ -28,8 +27,6 @@ public class LevelTimer : MonoBehaviour
     private float idleTimer;
 
     public bool IsFinished { get; private set; }
-
-    public float RemainingTime => remainingTime;
 
     public float Progress => remainingTime / levelDuration;
 
@@ -43,8 +40,7 @@ public class LevelTimer : MonoBehaviour
 
     private void Start()
     {
-        remainingTime = levelDuration;
-        UpdateUI();
+        ResetTimer();
     }
 
     private void Update()
@@ -68,24 +64,19 @@ public class LevelTimer : MonoBehaviour
             idleTimer += Time.deltaTime;
 
             if (idleTimer < graceTime)
-            {
                 TickTimer();
-            }
         }
     }
 
     private void TickTimer()
     {
         remainingTime -= Time.deltaTime;
-
-        remainingTime = Mathf.Max(0f, remainingTime);
+        remainingTime = Mathf.Max(remainingTime, 0f);
 
         UpdateUI();
 
         if (remainingTime <= 0f)
-        {
             FinishTimer();
-        }
     }
 
     private void UpdateUI()
@@ -104,8 +95,6 @@ public class LevelTimer : MonoBehaviour
         UpdateUI();
 
         OnTimerFinished?.Invoke();
-
-        Debug.Log("Timer Finished");
     }
 
     public void ResetTimer()
@@ -119,16 +108,13 @@ public class LevelTimer : MonoBehaviour
 
     public void AddTime(float seconds)
     {
-        remainingTime += seconds;
-        remainingTime = Mathf.Min(remainingTime, levelDuration);
-
+        remainingTime = Mathf.Min(levelDuration, remainingTime + seconds);
         UpdateUI();
     }
 
     public void ReduceTime(float seconds)
     {
-        remainingTime -= seconds;
-        remainingTime = Mathf.Max(0f, remainingTime);
+        remainingTime = Mathf.Max(0f, remainingTime - seconds);
 
         UpdateUI();
 

@@ -4,67 +4,84 @@ using UnityEngine;
 public class TrackTileSpawner : MonoBehaviour
 {
     [Header("Tile Prefabs")]
-    [SerializeField]
-    private List<TrackTile> tilePrefabs = new();
+    [SerializeField] private List<TrackTile> tilePrefabs = new();
+
+    [Header("Special Tile")]
+    [SerializeField] private TrackTile finishTile;
 
     [Header("References")]
-    [SerializeField]
-    private Transform spawnPoint;
+    [SerializeField] private Transform spawnPoint;
 
-    [SerializeField]
-    private Transform destroyPoint;
+    [SerializeField] private Transform destroyPoint;
 
     [Header("Spawn Settings")]
-    [SerializeField]
-    private int initialTiles = 5;
+    [SerializeField] private int initialTiles = 5;
 
     [Tooltip("Semakin besar nilainya maka tile berikutnya akan muncul lebih cepat.")]
-    [SerializeField]
-    private float spawnOffset = -4f;
+    [SerializeField] private float spawnOffset = -4f;
 
     [Tooltip("Tambahan jarak sebelum tile dihancurkan.")]
-    [SerializeField]
-    private float destroyOffset = 0f;
+    [SerializeField] private float destroyOffset = 0f;
 
-    [SerializeField]
-    private bool drawSpawnGizmo = true;
+    [SerializeField] private bool drawSpawnGizmo = true;
 
     private readonly List<TrackTile> activeTiles = new();
 
     private int nextPrefabIndex;
 
+    private bool spawnFinishTile;
+    private bool finishSpawned;
+
     public Transform SpawnPoint => spawnPoint;
     public Transform DestroyPoint => destroyPoint;
-    private int spawnedCount;
+
+    private void OnEnable()
+    {
+        if (LevelTimer.Instance != null)
+            LevelTimer.Instance.OnTimerFinished += HandleTimerFinished;
+    }
+
+    private void OnDisable()
+    {
+        if (LevelTimer.Instance != null)
+            LevelTimer.Instance.OnTimerFinished -= HandleTimerFinished;
+    }
 
     private void Start()
     {
-        spawnedCount = 0;
-
         SpawnTile();
     }
 
     private void Update()
     {
         SpawnLogic();
-
         DestroyLogic();
+    }
+
+    //==================================================
+    // TIMER EVENT
+    //==================================================
+
+    private void HandleTimerFinished()
+    {
+        if (finishTile == null)
+        {
+            Debug.LogError("Finish Tile belum diassign!");
+            return;
+        }
+
+        spawnFinishTile = true;
     }
 
     //==================================================
     // SPAWN
     //==================================================
 
-    private void SpawnInitialTiles()
-    {
-        for (int i = 0; i < initialTiles; i++)
-        {
-            SpawnTile();
-        }
-    }
-
     private void SpawnLogic()
     {
+        if (finishSpawned)
+            return;
+
         while (activeTiles.Count < initialTiles)
         {
             if (!CanSpawn())
@@ -93,10 +110,22 @@ public class TrackTileSpawner : MonoBehaviour
 
     private void SpawnTile()
     {
-        if (tilePrefabs.Count == 0)
-            return;
+        TrackTile prefab;
 
-        TrackTile prefab = GetNextPrefab();
+        if (spawnFinishTile && !finishSpawned)
+        {
+            prefab = finishTile;
+
+            spawnFinishTile = false;
+            finishSpawned = true;
+        }
+        else
+        {
+            if (tilePrefabs.Count == 0)
+                return;
+
+            prefab = GetNextPrefab();
+        }
 
         TrackTile tile = Instantiate(
             prefab,

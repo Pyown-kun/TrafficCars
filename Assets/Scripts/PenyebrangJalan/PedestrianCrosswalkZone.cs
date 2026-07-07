@@ -182,6 +182,12 @@ public class PedestrianCrosswalkZone : MonoBehaviour
 
         isFrozenForCrossing = true;
 
+        // Hentikan pergerakan Track Tile
+        if (TrackScrollManager.Instance != null)
+        {
+            TrackScrollManager.Instance.StopScrolling();
+        }
+
         if (playerCar != null)
         {
             playerCar.SetCrosswalkMovementLock(true);
@@ -191,6 +197,12 @@ public class PedestrianCrosswalkZone : MonoBehaviour
     public void ResumeCrosswalkAfterCrossing()
     {
         isFrozenForCrossing = false;
+
+        // Jalankan kembali Track Tile
+        if (TrackScrollManager.Instance != null)
+        {
+            TrackScrollManager.Instance.ResumeScrolling();
+        }
 
         if (playerCar != null)
         {
@@ -293,6 +305,16 @@ public class PedestrianCrosswalkZone : MonoBehaviour
         {
             WorldEventManager.Instance.FinishCurrentEvent();
             eventRegistered = false;
+        }
+
+        if (TrackScrollManager.Instance != null)
+        {
+            TrackScrollManager.Instance.ResumeScrolling();
+        }
+
+        if (playerCar != null)
+        {
+            playerCar.SetCrosswalkMovementLock(false);
         }
 
         if (playerCar != null)

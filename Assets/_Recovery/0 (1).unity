@@ -633,11 +633,7 @@ MonoBehaviour:
   - {fileID: 2369083080518861139, guid: 21b3b12b67bd64743a392f62647d3964, type: 3}
   - {fileID: -110054525975716079, guid: d02a80b2dd205cf47a44876c3c89e37c, type: 3}
   spawnPoint: {fileID: 1839192517}
-  destroyPoint: {fileID: 1472675462}
-  initialTiles: 12
-  spawnOffset: -4
-  destroyOffset: 0
-  drawSpawnGizmo: 1
+  initialTiles: 10
 --- !u!4 &717475999
 Transform:
   m_ObjectHideFlags: 0
@@ -912,7 +908,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5444f9204a5d03144bcdcfa11aea348e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrackScrollManager
-  stopScrolling: 0
+  spawner: {fileID: 717475998}
+  recyclePoint: {fileID: 1472675462}
 --- !u!1 &1267529379
 GameObject:
   m_ObjectHideFlags: 0
@@ -1134,8 +1131,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCarController
   moveSpeed: 8
-  minX: -3.5
-  maxX: 3.5
+  minX: -3
+  maxX: 3
   isBraking: 0
   movementLockedByCrosswalk: 0
 --- !u!54 &1411187842
@@ -1481,7 +1478,7 @@ Transform:
   m_GameObject: {fileID: 1839192516}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 83.6}
+  m_LocalPosition: {x: 0, y: 0, z: 69.18}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

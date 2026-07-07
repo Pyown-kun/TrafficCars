@@ -600,61 +600,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &717475997
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 717475999}
-  - component: {fileID: 717475998}
-  m_Layer: 0
-  m_Name: TilesSpawnerManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &717475998
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717475997}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62295aaa33faa344fad531a599f453ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrackTileSpawner
-  tilePrefabs:
-  - {fileID: 2369083080518861139, guid: 21b3b12b67bd64743a392f62647d3964, type: 3}
-  - {fileID: -110054525975716079, guid: d02a80b2dd205cf47a44876c3c89e37c, type: 3}
-  spawnPoint: {fileID: 1839192517}
-  destroyPoint: {fileID: 1472675462}
-  initialTiles: 12
-  spawnOffset: -4
-  destroyOffset: 0
-  drawSpawnGizmo: 1
---- !u!4 &717475999
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 717475997}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.7, z: -39.88}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1839192517}
-  - {fileID: 1472675462}
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &935247183
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,7 +739,6 @@ GameObject:
   - component: {fileID: 1096405323}
   - component: {fileID: 1096405326}
   - component: {fileID: 1096405327}
-  - component: {fileID: 1096405330}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -900,19 +844,6 @@ MonoBehaviour:
   maxEventInterval: 8
   ambulanceChance: 0
   crosswalkChance: 100
---- !u!114 &1096405330
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1096405322}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5444f9204a5d03144bcdcfa11aea348e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TrackScrollManager
-  stopScrolling: 0
 --- !u!1 &1267529379
 GameObject:
   m_ObjectHideFlags: 0
@@ -1134,8 +1065,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCarController
   moveSpeed: 8
-  minX: -3.5
-  maxX: 3.5
+  minX: -3
+  maxX: 3
   isBraking: 0
   movementLockedByCrosswalk: 0
 --- !u!54 &1411187842
@@ -1230,37 +1161,6 @@ MonoBehaviour:
   playAfterBrakeTrigger: PlayAfterBrake
   turnThreshold: 0.1
   horizontalSmoothSpeed: 12
---- !u!1 &1472675461
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1472675462}
-  m_Layer: 0
-  m_Name: TilesDestroyer
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1472675462
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1472675461}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 717475999}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1487195675
 GameObject:
   m_ObjectHideFlags: 0
@@ -1455,37 +1355,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1839192516
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1839192517}
-  m_Layer: 0
-  m_Name: TilesSpawner
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1839192517
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1839192516}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 83.6}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 717475999}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1906372313
 GameObject:
@@ -1923,7 +1792,6 @@ SceneRoots:
   - {fileID: 2034504514}
   - {fileID: 604305613}
   - {fileID: 631781949}
-  - {fileID: 717475999}
   - {fileID: 2016338084}
   - {fileID: 1579909743}
   - {fileID: 2068677030}

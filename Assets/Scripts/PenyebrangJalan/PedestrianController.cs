@@ -5,7 +5,8 @@ public class PedestrianController : MonoBehaviour
     public enum PedestrianState
     {
         Waiting,
-        Crossing
+        Crossing,
+        Finished
     }
 
     [Header("Movement")]
@@ -17,6 +18,8 @@ public class PedestrianController : MonoBehaviour
     public Transform endPoint;
     public PlayerCarController playerCar;
     public PedestrianCrosswalkZone crosswalkZone;
+
+    public PedestrianState CurrentState => currentState;
 
     private PedestrianState currentState = PedestrianState.Waiting;
     private bool initialized = false;
@@ -33,8 +36,7 @@ public class PedestrianController : MonoBehaviour
         playerCar = player;
         crosswalkZone = zone;
 
-        // Penting: pedestrian harus child dari zone
-        // lalu posisinya mengikuti local point
+        // Posisi awal mengikuti Start Point
         transform.localPosition = startPoint.localPosition;
 
         initialized = true;
@@ -56,10 +58,17 @@ public class PedestrianController : MonoBehaviour
             case PedestrianState.Crossing:
                 HandleCrossing();
                 break;
+
+            case PedestrianState.Finished:
+                HandleFinished();
+                break;
         }
     }
 
-   void HandleWaiting()
+    /// <summary>
+    /// Menunggu sampai pemain berhenti di zebra cross.
+    /// </summary>
+    private void HandleWaiting()
     {
         if (playerCar == null)
             return;
@@ -70,26 +79,35 @@ public class PedestrianController : MonoBehaviour
         if (crosswalkZone.IsAmbulanceBlocking())
             return;
 
-        // Player harus benar-benar sudah freeze
         if (!crosswalkZone.IsPlayerFrozen())
             return;
 
         currentState = PedestrianState.Crossing;
     }
 
-    void HandleCrossing()
+    /// <summary>
+    /// Bergerak menuju titik akhir.
+    /// </summary>
+    private void HandleCrossing()
     {
-        if (endPoint == null) return;
+        if (endPoint == null)
+            return;
 
-        // Gerak dalam LOCAL SPACE zone
         transform.localPosition = Vector3.MoveTowards(
             transform.localPosition,
             endPoint.localPosition,
             crossSpeed * Time.deltaTime
         );
 
-        Vector3 currentFlat = new Vector3(transform.localPosition.x, 0f, transform.localPosition.z);
-        Vector3 targetFlat = new Vector3(endPoint.localPosition.x, 0f, endPoint.localPosition.z);
+        Vector3 currentFlat = new Vector3(
+            transform.localPosition.x,
+            0f,
+            transform.localPosition.z);
+
+        Vector3 targetFlat = new Vector3(
+            endPoint.localPosition.x,
+            0f,
+            endPoint.localPosition.z);
 
         if (Vector3.Distance(currentFlat, targetFlat) <= reachDistance)
         {
@@ -97,13 +115,64 @@ public class PedestrianController : MonoBehaviour
         }
     }
 
-    void FinishCrossing()
+    /// <summary>
+    /// Setelah berhasil menyeberang.
+    /// </summary>
+    private void FinishCrossing()
     {
+        // Pastikan posisi tepat di titik tujuan
+        transform.localPosition = endPoint.localPosition;
+
+        // Ubah state menjadi selesai
+        currentState = PedestrianState.Finished;
+
+        // Beri tahu Crosswalk bahwa penyebrang selesai
         if (crosswalkZone != null)
         {
             crosswalkZone.NotifyPedestrianFinished();
         }
 
-        Destroy(gameObject);
+        // Tidak di-Destroy agar NPC tetap berada di lokasi
+    }
+
+    /// <summary>
+    /// Penyebrang selesai menyeberang.
+    /// </summary>
+    private void HandleFinished()
+    {
+        // Sengaja dikosongkan.
+        // Bisa ditambahkan animasi idle,
+        // melihat sekitar,
+        // atau berjalan ke tujuan lain.
+    }
+
+    /// <summary>
+    /// Mengembalikan penyebrang ke posisi awal.
+    /// Berguna jika nanti ingin menggunakan object pooling.
+    /// </summary>
+    public void ResetPedestrian()
+    {
+        if (startPoint == null)
+            return;
+
+        transform.localPosition = startPoint.localPosition;
+
+        currentState = PedestrianState.Waiting;
+    }
+
+    /// <summary>
+    /// Mengecek apakah penyebrang sedang berjalan.
+    /// </summary>
+    public bool IsCrossing()
+    {
+        return currentState == PedestrianState.Crossing;
+    }
+
+    /// <summary>
+    /// Mengecek apakah penyebrang sudah selesai.
+    /// </summary>
+    public bool HasFinishedCrossing()
+    {
+        return currentState == PedestrianState.Finished;
     }
 }

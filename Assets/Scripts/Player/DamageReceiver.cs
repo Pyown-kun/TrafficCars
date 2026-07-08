@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class DamageReceiver : MonoBehaviour
 {
+    [SerializeField] private PlayerDamageFlash damageFlash;
+
     [Serializable]
     public class DamageSetting
     {
@@ -27,6 +29,11 @@ public class DamageReceiver : MonoBehaviour
 
     private float lastCollisionTime;
 
+    private void Awake()
+    {
+        damageFlash = GetComponent<PlayerDamageFlash>();
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         TryApplyDamage(collision.gameObject);
@@ -39,6 +46,10 @@ public class DamageReceiver : MonoBehaviour
 
     private void TryApplyDamage(GameObject target)
     {
+
+        if (damageFlash != null && damageFlash.IsInvincible)
+        return;
+
         if (Time.time < lastCollisionTime + collisionCooldown)
             return;
 
@@ -58,6 +69,8 @@ public class DamageReceiver : MonoBehaviour
             TofuQuality.Instance.ReduceQuality(setting.tofuDamage);
 
             WorldSpeedManager.Instance.ApplyCollisionSlowdown(setting.slowdown);
+
+            damageFlash?.PlayFlash();
 
             lastCollisionTime = Time.time;
 

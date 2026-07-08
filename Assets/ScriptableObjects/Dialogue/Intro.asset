@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59378027043f98841be248bbaf5d0db5, type: 3}
+  m_Name: Intro
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueData
+  lines:
+  - showLeftCharacter: 1
+    inheritLeftCharacter: 0
+    leftCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
+    showRightCharacter: 0
+    inheritRightCharacter: 0
+    rightCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
+    speaker: 0
+    dialogue: Haloo
+  - showLeftCharacter: 0
+    inheritLeftCharacter: 0
+    leftCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
+    showRightCharacter: 1
+    inheritRightCharacter: 0
+    rightCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
+    speaker: 1
+    dialogue: ....
+  - showLeftCharacter: 1
+    inheritLeftCharacter: 0
+    leftCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
+    showRightCharacter: 0
+    inheritRightCharacter: 0
+    rightCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
+    speaker: 0
+    dialogue: Bernafas
+  - showLeftCharacter: 0
+    inheritLeftCharacter: 0
+    leftCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
+    showRightCharacter: 1
+    inheritRightCharacter: 0
+    rightCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
+    speaker: 1
+    dialogue: .....

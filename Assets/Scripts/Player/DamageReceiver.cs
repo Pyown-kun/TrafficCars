@@ -29,9 +29,12 @@ public class DamageReceiver : MonoBehaviour
 
     private float lastCollisionTime;
 
+    private ViolationManager violationManager;
+
     private void Awake()
     {
         damageFlash = GetComponent<PlayerDamageFlash>();
+        violationManager = GetComponent<ViolationManager>();
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -71,6 +74,8 @@ public class DamageReceiver : MonoBehaviour
             WorldSpeedManager.Instance.ApplyCollisionSlowdown(setting.slowdown);
 
             damageFlash?.PlayFlash();
+
+            violationManager?.TryAddViolation(target);
 
             lastCollisionTime = Time.time;
 

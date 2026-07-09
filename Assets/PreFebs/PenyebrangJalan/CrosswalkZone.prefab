@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3716091930297263838}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RightEndPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,9 +43,9 @@ GameObject:
   - component: {fileID: 87291088235434731}
   - component: {fileID: 6015868971082811001}
   - component: {fileID: 427680568179219636}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: 'FrontTrafficTrigger  '
-  m_TagString: Untagged
+  m_TagString: Crosswalk
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -123,7 +123,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4561098974609987238}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: LeftEndPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,7 +157,7 @@ GameObject:
   - component: {fileID: 4914779443467583020}
   - component: {fileID: 4040164482697347576}
   - component: {fileID: 4717775041438701075}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: NearTrafficTrigger
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -239,7 +239,7 @@ GameObject:
   - component: {fileID: 5726678284308300724}
   - component: {fileID: 7779499301668166881}
   - component: {fileID: 6405071106758528091}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CrossWalkNoStopZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -303,7 +303,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8458249088482546271}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RightStartPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -334,7 +334,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8463428641845509217}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: LeftStartPoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -366,9 +366,9 @@ GameObject:
   m_Component:
   - component: {fileID: 5254579290030339340}
   - component: {fileID: 5660137323982633880}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CrosswalkZone
-  m_TagString: Untagged
+  m_TagString: Crosswalk
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

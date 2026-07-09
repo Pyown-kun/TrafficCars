@@ -9,6 +9,8 @@ public class FrontCrosswalkTrafficTrigger : MonoBehaviour
 
     private readonly HashSet<NPCCarController> towardPlayerNPCs = new HashSet<NPCCarController>();
 
+    private bool playerAlreadyPenalized;
+
     private void Reset()
     {
         BoxCollider col = GetComponent<BoxCollider>();
@@ -42,20 +44,39 @@ public class FrontCrosswalkTrafficTrigger : MonoBehaviour
                 npc.SetStoppedByCrosswalk(false);
             }
         }
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (crosswalkZone == null) return;
+        if (crosswalkZone == null)
+            return;
 
-        // Player TIDAK diproses di trigger depan
+        // PLAYER
         if (other.CompareTag("Player"))
         {
+            // Penyebrang sudah selesai atau tidak ada event
+            if (!crosswalkZone.CanPlayerReceivePenalty())
+                return;
+
+            // Sudah pernah didenda pada crosswalk ini
+            if (playerAlreadyPenalized)
+                return;
+
+            playerAlreadyPenalized = true;
+
+            ViolationManager violation =
+                other.GetComponent<ViolationManager>();
+
+            violation?.TryAddViolation(gameObject);
+
             return;
         }
 
+        // NPC
         NPCCarController npc = other.GetComponentInParent<NPCCarController>();
-        if (npc == null) return;
+        if (npc == null)
+            return;
 
         // Hanya NPC lawan arah / toward-player
         if (npc.trafficType != NPCCarController.TrafficType.TowardPlayer)
@@ -78,4 +99,5 @@ public class FrontCrosswalkTrafficTrigger : MonoBehaviour
             crosswalkZone.UnregisterNPCInsideStopArea(npc);
         }
     }
+
 }

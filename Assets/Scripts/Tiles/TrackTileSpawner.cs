@@ -37,14 +37,20 @@ public class TrackTileSpawner : MonoBehaviour
 
     private void OnEnable()
     {
+
+        Debug.Log("TrackTileSpawner OnEnable");
         if (LevelTimer.Instance != null)
-            LevelTimer.Instance.OnTimerFinished += HandleTimerFinished;
+        {
+            Debug.Log("LevelTimer.Instance masih NULL");
+            return;
+        }
+            LevelTimer.OnTimerFinished += HandleTimerFinished;
     }
 
     private void OnDisable()
     {
         if (LevelTimer.Instance != null)
-            LevelTimer.Instance.OnTimerFinished -= HandleTimerFinished;
+            LevelTimer.OnTimerFinished -= HandleTimerFinished;
     }
 
     private void Start()
@@ -64,6 +70,9 @@ public class TrackTileSpawner : MonoBehaviour
 
     private void HandleTimerFinished()
     {
+
+        Debug.Log("Timer Finished");
+        
         if (finishTile == null)
         {
             Debug.LogError("Finish Tile belum diassign!");
@@ -114,6 +123,8 @@ public class TrackTileSpawner : MonoBehaviour
 
         if (spawnFinishTile && !finishSpawned)
         {
+            Debug.Log("Spawn Finish Tile");
+
             prefab = finishTile;
 
             spawnFinishTile = false;

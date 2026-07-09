@@ -364,4 +364,13 @@ public class PedestrianCrosswalkZone : MonoBehaviour
     {
         return eventRegistered;
     }
+
+    public bool CanPlayerReceivePenalty()
+    {
+        if (currentPedestrian == null)
+            return false;
+
+        return currentPedestrian.CurrentState !=
+            PedestrianController.PedestrianState.Finished;
+    }
 }

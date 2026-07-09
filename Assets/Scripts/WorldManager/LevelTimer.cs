@@ -14,17 +14,23 @@ public class LevelTimer : MonoBehaviour
     private float moveThresholdRatio = 0.4f;
 
     [Header("UI")]
-    [SerializeField] private Image progressImage;
+    [SerializeField] private Slider progressSlider;
 
     [Header("Pause Settings")]
     [SerializeField] private bool useGraceTime = true;
 
     [SerializeField] private float graceTime = 2f;
 
-    public event Action OnTimerFinished;
+    [Header("Smooth UI")]
+    [SerializeField] private bool smoothSlider = true;
+
+    [SerializeField] private float smoothSpeed = 10f;
+
+    public static event Action OnTimerFinished;
 
     private float remainingTime;
     private float idleTimer;
+    private float displayedProgress = 1f;
 
     public bool IsFinished { get; private set; }
 
@@ -40,16 +46,26 @@ public class LevelTimer : MonoBehaviour
 
     private void Start()
     {
+        if (progressSlider != null)
+        {
+            progressSlider.minValue = 0f;
+            progressSlider.maxValue = 1f;
+        }
+
         ResetTimer();
     }
 
     private void Update()
     {
+        UpdateSliderUI();
+
         if (IsFinished)
             return;
 
-        bool moving =
-            WorldSpeedManager.Instance.GetSpeedRatio() >= moveThresholdRatio;
+        if (WorldSpeedManager.Instance == null)
+            return;
+
+        bool moving = WorldSpeedManager.Instance.GetSpeedRatio() >= moveThresholdRatio;
 
         if (moving)
         {
@@ -73,26 +89,51 @@ public class LevelTimer : MonoBehaviour
         remainingTime -= Time.deltaTime;
         remainingTime = Mathf.Max(remainingTime, 0f);
 
-        UpdateUI();
+        if (!smoothSlider)
+            UpdateSliderInstant();
 
         if (remainingTime <= 0f)
             FinishTimer();
     }
 
-    private void UpdateUI()
+    private void UpdateSliderInstant()
     {
-        if (progressImage != null)
-            progressImage.fillAmount = remainingTime / levelDuration;
+        if (progressSlider == null)
+            return;
+
+        progressSlider.value = Progress;
+    }
+
+    private void UpdateSliderUI()
+    {
+        if (progressSlider == null)
+            return;
+
+        if (smoothSlider)
+        {
+            displayedProgress = Mathf.Lerp(
+                displayedProgress,
+                Progress,
+                Time.deltaTime * smoothSpeed);
+
+            progressSlider.value = displayedProgress;
+        }
+        else
+        {
+            progressSlider.value = Progress;
+        }
     }
 
     private void FinishTimer()
     {
+        Debug.Log("FinishTimer dipanggil");
+
         if (IsFinished)
             return;
 
         IsFinished = true;
 
-        UpdateUI();
+        UpdateSliderInstant();
 
         OnTimerFinished?.Invoke();
     }
@@ -103,20 +144,25 @@ public class LevelTimer : MonoBehaviour
         idleTimer = 0f;
         IsFinished = false;
 
-        UpdateUI();
+        displayedProgress = 1f;
+
+        UpdateSliderInstant();
     }
 
     public void AddTime(float seconds)
     {
         remainingTime = Mathf.Min(levelDuration, remainingTime + seconds);
-        UpdateUI();
+
+        if (!smoothSlider)
+            UpdateSliderInstant();
     }
 
     public void ReduceTime(float seconds)
     {
         remainingTime = Mathf.Max(0f, remainingTime - seconds);
 
-        UpdateUI();
+        if (!smoothSlider)
+            UpdateSliderInstant();
 
         if (remainingTime <= 0f)
             FinishTimer();

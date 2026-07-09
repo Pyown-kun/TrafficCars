@@ -20,7 +20,18 @@ MonoBehaviour:
     inheritRightCharacter: 0
     rightCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
     speaker: 0
-    dialogue: Haloo
+    dialogue: 'Today is the greed day. '
+  - showLeftCharacter: 1
+    inheritLeftCharacter: 0
+    leftCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
+    showRightCharacter: 0
+    inheritRightCharacter: 0
+    rightCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
+    speaker: 0
+    dialogue: 'Lets send some tofu....
+
+
+      fu~fu'
   - showLeftCharacter: 0
     inheritLeftCharacter: 0
     leftCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
@@ -29,19 +40,3 @@ MonoBehaviour:
     rightCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
     speaker: 1
     dialogue: ....
-  - showLeftCharacter: 1
-    inheritLeftCharacter: 0
-    leftCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
-    showRightCharacter: 0
-    inheritRightCharacter: 0
-    rightCharacter: {fileID: 11400000, guid: 13277a1ad77e9184da7a5d7ec2371093, type: 2}
-    speaker: 0
-    dialogue: Bernafas
-  - showLeftCharacter: 0
-    inheritLeftCharacter: 0
-    leftCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
-    showRightCharacter: 1
-    inheritRightCharacter: 0
-    rightCharacter: {fileID: 11400000, guid: 2fb3a5a368f775d41949cbe48cbb41a6, type: 2}
-    speaker: 1
-    dialogue: .....

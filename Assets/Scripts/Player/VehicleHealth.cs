@@ -45,8 +45,11 @@ public class VehicleHealth : MonoBehaviour
 
         OnHealthChanged?.Invoke(currentHealth);
 
+        Debug.Log($"Current Health : {currentHealth}");
+
         if (currentHealth <= 0f)
         {
+            Debug.Log("Player Dead!");
             OnDead?.Invoke();
         }
     }

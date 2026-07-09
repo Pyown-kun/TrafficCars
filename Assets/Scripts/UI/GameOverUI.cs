@@ -2,21 +2,42 @@ using UnityEngine;
 
 public class GameOverUI : MonoBehaviour
 {
-    public UIGameManager uiGameManager;
+    [SerializeField] private GameObject gameOverPanel;
 
-    public void RetryGame()
+    private VehicleHealth vehicleHealth;
+
+    private void Awake()
     {
-        if (uiGameManager != null)
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+    }
+
+    private void Start()
+    {
+        vehicleHealth = VehicleHealth.Instance;
+
+        if (vehicleHealth != null)
         {
-            uiGameManager.RetryGame();
+            vehicleHealth.OnDead += ShowGameOver;
+            Debug.Log("GameOverUI Subscribe Success");
+        }
+        else
+        {
+            Debug.LogError("VehicleHealth tidak ditemukan!");
         }
     }
 
-    public void BackToMainMenu()
+    private void OnDestroy()
     {
-        if (uiGameManager != null)
-        {
-            uiGameManager.GoToMainMenu();
-        }
+        if (vehicleHealth != null)
+            vehicleHealth.OnDead -= ShowGameOver;
+    }
+
+    private void ShowGameOver()
+    {
+        Debug.Log("SHOW GAME OVER");
+
+        gameOverPanel.SetActive(true);
+        Time.timeScale = 0f;
     }
 }

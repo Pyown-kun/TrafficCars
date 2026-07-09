@@ -129,6 +129,9 @@ public class TrackTileSpawner : MonoBehaviour
 
             spawnFinishTile = false;
             finishSpawned = true;
+
+            if (FinishManager.Instance != null)
+                FinishManager.Instance.BeginFinishPhase();
         }
         else
         {

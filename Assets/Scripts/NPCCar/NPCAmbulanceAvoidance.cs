@@ -441,18 +441,22 @@ void TickMerging()
             mergeTargetX,
             t);
 
-    transform.position =
-        pos;
+    transform.position = pos;
 
     //----------------------------------------------------
     // Animasi belok
     //----------------------------------------------------
 
     float turn =
-        Mathf.Sin(
-            t * Mathf.PI)
+        Mathf.Sin(t * Mathf.PI)
         * maxTurnAngle
         * mergeDirectionSign;
+
+    // SameDirection membutuhkan arah belok yang berlawanan
+    if (npcController.IsSameDirection())
+    {
+        turn = -turn;
+    }
 
     transform.rotation =
         Quaternion.Euler(
